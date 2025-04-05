@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role{
+  USER
+  ADMIN
+
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+model User{
+  id         Int             @id @default(autoincrement())
+  name       String         
+  email      String          @unique 
+  password   String
+  role       Role            @default(USER)
+  status     Boolean         @default(true)
+  imageURL   String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model EventReminder {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  sentAt    DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+}
+
+model Event {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(255)
+  description    String?
+  date           DateTime
+  location       String   @db.VarChar(255)
+  category       String   @db.VarChar(100)
+  price          Float    @default(0.0) 
+  maxAttendees   Int
+  availableSeats Int
+  imageURL       String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt 
+
+  reminders      EventReminder[] 
+}
