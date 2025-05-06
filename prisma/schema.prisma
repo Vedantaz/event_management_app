@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id         Int             @id @default(autoincrement())
+  name       String         
+  email      String          @unique 
+  password   String
+  role       Role            @default(USER)
+  status     Status         @default(ACTIVE)
+  imageURL   String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  events      Event[]
+  bookings    Booking[]
+  favorites   Favorites[]
+  reviews     Review[]
+  attendees   Attendee[]
+  cancellations Cancellation[]
+
+}
+
+
+model Event {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(255)
+  description    String?
+  date           DateTime
+  location       String   @db.VarChar(255)
+  category       String   @db.VarChar(100)
+  price          Float    @default(0.0) 
+  maxAttendees   Int
+  availableSeats Int
+  imageURL       String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt 
+  userId      Int
+  user        User          @relation(fields: [userId], references: [id], onDelete:Cascade)
+  bookings       Booking[]
+  attendees      Attendee[]
+
+  favorites Favorites[]
+  reviews Review[]
+  cancellations  Cancellation[]
+}
+
+
+model Booking {
+  id           Int     @id @default(autoincrement())
+  userId       Int
+  eventId      Int
+  status       BookingStatus  @default(PENDING)
+  ticketCount  Int     @default(1)
+  amount      Float
+ registeredAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id],  onDelete:Cascade)
+  event       Event    @relation(fields: [eventId], references: [id],  onDelete:Cascade)
+
+  @@unique([userId, eventId]) 
+  cancellations Cancellation[]
+}
+
+model Attendee {
+  id        Int      @id @default(autoincrement())
+  eventId   Int
+  userId    Int
+  checkedIn Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id],  onDelete:Cascade)
+  event     Event    @relation(fields: [eventId], references: [id],  onDelete:Cascade)
+}
+
+model Favorites{
+  id      Int   @id @default(autoincrement())
+  userId  Int  
+  eventId Int 
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  eventId   Int
+  rating    Int
+  message   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId]) // Users can review an event only once
+}
+
+model Cancellation {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  bookingId Int
+  eventId   Int
+  amount    Float
+  status    CancelStatus  @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id],  onDelete:Cascade)
+  booking   Booking       @relation(fields: [bookingId], references: [id],  onDelete:Cascade)
+  event     Event         @relation(fields: [eventId], references: [id],  onDelete:Cascade)
+}
+
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+  COMPLETED
+}
+
+enum CancelStatus {
+  PROCESSING
+  PENDING
+  COMPLETED
+}
