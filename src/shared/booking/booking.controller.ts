@@ -130,10 +130,13 @@ export class BookingController {
   @Delete("cancel-booking")
   @ApiOperation({ summary: bookingMessages.CANCEL_BOOKING })
   @UseGuards(JwtAuthGuard)
+<<<<<<< HEAD
   @ApiResponse({
     status: 409,
     description: bookingMessages.BOOKING_ALREADY_CANCELLED,
   })
+=======
+>>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   async CancelBooking(@Body() data: cancelTicket) {
     try {
       await this.bookingService.deleteBooking(data);

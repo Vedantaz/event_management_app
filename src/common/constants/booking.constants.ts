@@ -17,7 +17,10 @@ export const bookingMessages = {
   GET_ALL_BOOKINGS: "Get all bookings.",
   GET_SPECIFIC_DATA: "Get a specific booking data.",
   CANCEL_BOOKING: "Cancel booking",
+<<<<<<< HEAD
   BOOKING_ALREADY_CANCELLED: "Booking is already cancelled.",
+=======
+>>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   UPDATE_BOOKINGS: "Update the booking.",
   REFUND_PROCESS: "Refund-process by admin",
   REVIEW_CREATED_SUCCESS: "Review created successfully",

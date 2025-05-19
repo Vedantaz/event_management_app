@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+<<<<<<< HEAD
   Get,
+=======
+>>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   HttpStatus,
   Post,
   Req,
@@ -14,7 +17,10 @@ import { JwtAuthGuard } from "../common/guards/jwtAuthGuard";
 import { auth, Messages } from "src/common/constants/auth.constants";
 import {
   ApiBearerAuth,
+<<<<<<< HEAD
   ApiHeader,
+=======
+>>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
@@ -23,10 +29,13 @@ import {
 import { TokenDto } from "./dto/token.dto";
 import { SuccessResponse } from "src/common/interceptors/success-response.interceptor";
 import { Request } from "express";
+<<<<<<< HEAD
 import { RolesGuard } from "src/common/guards/role.guard";
 import { I18n, I18nContext } from "nestjs-i18n";
 import { AuthUser } from "src/common/decorators/auth.decorator";
 import { JwtPayloadDto } from "./dto/jwtPayload.dto";
+=======
+>>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
 @Controller("auth")
 @ApiTags("Auth Controller")
 export class AuthController {
@@ -75,6 +84,7 @@ export class AuthController {
       message: Messages.AUTH.COOKIE_DELETED_SUCCESS,
     };
   }
+<<<<<<< HEAD
 
   @Get("dashboard")
   @ApiBearerAuth()
@@ -94,4 +104,6 @@ export class AuthController {
     console.log("Resolved language:", i18n.lang);
     return { message: i18n.t("dashboard.data_in_dashboard"), data: data };
   }
+=======
+>>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
 }

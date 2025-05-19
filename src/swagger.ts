@@ -9,12 +9,15 @@ export const setupSwagger = (app: INestApplication) => {
     .setVersion("1.0")
     .addTag("Mini Project")
     .addBearerAuth()
+<<<<<<< HEAD
     .addGlobalParameters({
       name: "Accept-Language",
       in: "header",
       required: false,
       schema: { type: "string", default: "en" },
     })
+=======
+>>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, documentFactory, {
