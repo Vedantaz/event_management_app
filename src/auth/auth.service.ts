@@ -9,11 +9,6 @@ import { Messages } from "src/common/constants/auth.constants";
 import { SignupDto } from "./dto/signup.dto";
 import * as bcrypt from "bcrypt";
 import { LoginDto } from "./dto/login.dto";
-import { PayloadDto } from "./dto/payload.dto";
-import { ROLES, STATUS } from "src/common/enums/enums";
-import { TokenDto } from "./dto/token.dto";
-import { signupResponseDto } from "./dto/signupResponse.sto";
-import { SuccessResponse } from "src/common/interceptors/success-response.interceptor";
 
 @Injectable()
 export class AuthService {
@@ -22,7 +17,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async signup(data: SignupDto): Promise<SuccessResponse<signupResponseDto>> {
+  async signup(data: SignupDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -31,7 +26,7 @@ export class AuthService {
     }
 
     const hashPassword = await bcrypt.hash(data.password, 10);
-    await this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
@@ -39,10 +34,10 @@ export class AuthService {
         role: data.role,
       },
     });
-    return { message: Messages.USER_REGISTER_SUCCESS };
+    return { msg: Messages.USER_REGISTER_SUCCESS, user };
   }
 
-  async login(data: LoginDto): Promise<TokenDto> {
+  async login(data: LoginDto): Promise<{ access_token: string }> {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
@@ -52,13 +47,8 @@ export class AuthService {
     if (!validPassword)
       throw new UnauthorizedException(Messages.INVALID_CREDENTIALS);
 
-    const payload: PayloadDto = {
-      userId: user.id,
-      role: user.role as ROLES,
-      status: user.status as STATUS,
-    };
-    const token = this.jwtService.sign(payload);
-    return { accessToken: token };
+    const token = this.jwtService.sign({ userId: user.id, role: user.role });
+    return { access_token: token };
   }
 
   async dashboard(userId: number) {
