@@ -1,48 +1,100 @@
-import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma.service';
-
-import { SignupDto } from './dto/signup.dto';
-import * as bcrypt from 'bcrypt';
-import { LoginDto } from './dto/login.dto';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { PrismaService } from "src/prisma.service";
+import { Messages } from "src/common/constants/auth.constants";
+import { SignupDto } from "./dto/signup.dto";
+import * as bcrypt from "bcrypt";
+import { LoginDto } from "./dto/login.dto";
+import { PayloadDto } from "./dto/payload.dto";
+import { ROLES, STATUS } from "src/common/enums/enums";
+import { TokenDto } from "./dto/token.dto";
+import { signupResponseDto } from "./dto/signupResponse.sto";
+import { SuccessResponse } from "src/common/interceptors/success-response.interceptor";
 
 @Injectable()
 export class AuthService {
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService
+  ) {}
 
-    constructor(private prisma:PrismaService, private jwtService:JwtService){}
-
-    async signup(data:SignupDto){
-        
-            const existingUser = await this.prisma.user.findUnique({
-                where: { email: data.email }
-            });
-            if (existingUser) { throw new BadRequestException("Email is already in use, please login!"); }
-            
-            const hashPassword = await bcrypt.hash(data.password, 10);
-            const user = await this.prisma.user.create({
-                data:{
-                    name:data.name,
-                    email:data.email,
-                    password:hashPassword,
-                    role:data.role
-    
-                }
-            })
-            return {msg : "User registered successfully!", user}
-        
+  async signup(data: SignupDto): Promise<SuccessResponse<signupResponseDto>> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (existingUser) {
+      throw new BadRequestException(Messages.EMAIL_ALREADY_IN_USE);
     }
 
-    async login(data:LoginDto) : Promise<{access_token:string}>{
+    const hashPassword = await bcrypt.hash(data.password, 10);
+    await this.prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password: hashPassword,
+        role: data.role,
+      },
+    });
+    return { message: Messages.USER_REGISTER_SUCCESS };
+  }
 
-            const user = await this.prisma.user.findUnique({where:{email:data.email}});
-            if(!user) throw new UnauthorizedException('Invalid Credentials');
+  async login(data: LoginDto): Promise<TokenDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+    if (!user) throw new UnauthorizedException(Messages.INVALID_CREDENTIALS);
 
-            const validPassword = await bcrypt.compare(data.password, user.password);
-            if(!validPassword) throw new UnauthorizedException('Invalid Credentials');
+    const validPassword = await bcrypt.compare(data.password, user.password);
+    if (!validPassword)
+      throw new UnauthorizedException(Messages.INVALID_CREDENTIALS);
 
-            const token = this.jwtService.sign({userId:user.id, role:user.role});
-            return {access_token:token};
-        
+    const payload: PayloadDto = {
+      userId: user.id,
+      role: user.role as ROLES,
+      status: user.status as STATUS,
+    };
+    const token = this.jwtService.sign(payload);
+    return { accessToken: token };
+  }
+
+  async dashboard(userId: number) {
+    const countUsers = await this.prisma.user.count();
+
+    const countEvents = await this.prisma.event.count();
+
+    const countBookings = await this.prisma.booking.count();
+
+    const maxRatingRes = await this.prisma.review.aggregate({
+      _max: { rating: true },
+    });
+
+    const maxRating = maxRatingRes._max.rating;
+    if (maxRating === null) {
+      return [];
     }
- 
+
+    const topRatedEvents = await this.prisma.review.findMany({
+      where: { rating: maxRating },
+    });
+
+    const eventData = await this.prisma.event.findMany({
+      where: { userId: userId },
+
+      include: { user: true }, // gives al event and user info who created and what created
+    });
+
+    const data = {
+      "total bookings": countBookings,
+      "Total users": countUsers,
+      "Total events": countEvents,
+      "Top Rated Events": topRatedEvents,
+      "Event data": eventData,
+    };
+
+    return data;
+  }
 }

@@ -1,46 +1,65 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
-import { PrismaService } from './prisma.service';
-import { AuthModule } from './auth/auth.module';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { ConfigModule } from '@nestjs/config';
-import { UploadModule } from './upload/upload.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { MailService } from './mail/mail.service';
-import { LoggerMiddleware } from './middleware/logger.middleware';
-import { EventService } from './event/event.service';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { EventModule } from './event/event.module';
+import { Module } from "@nestjs/common";
+import { UsersModule } from "./shared/users/users.module";
+import { AuthModule } from "./auth/auth.module";
+import { MailerModule } from "@nestjs-modules/mailer";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { UploadModule } from "./shared/upload/upload.module";
+import { ScheduleModule } from "@nestjs/schedule";
+import { EventModule } from "./shared/event/event.module";
+import { MailModule } from "./shared/mail/mail.module";
+import { BookingModule } from "./shared/booking/booking.module";
+import { AttendeesModule } from "./shared/attendees/attendees.module";
+import { FavoritesModule } from "./shared/favorites/favorites.module";
+import { ReviewModule } from "./shared/review/review.module";
+import { validationSchema } from "./common/config/config.schema";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { I18nModule, HeaderResolver } from "nestjs-i18n";
+import * as path from "path";
 @Module({
-  imports: [UsersModule, AuthModule, ScheduleModule.forRoot(),EventEmitterModule.forRoot(),
-    ConfigModule.forRoot(),
-      MailerModule.forRoot({
-          transport: {
-            host: process.env.MAIL_HOST,
-            port: process.env.MAIL_PORT,
-            secure: false,
-            auth: {
-              user: process.env.MAIL_USER,
-              pass: process.env.MAIL_PASSWORD,
-            },
-          },
-          defaults: {
-            from:  process.env.MAIL_FROM, 
-          },
+  imports: [
+    AuthModule,
+    UsersModule,
+    ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema,
     }),
-      UploadModule,
-      EventModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          host: config.get<string>("MAIL_HOST"),
+          port: config.get<number>("MAIL_PORT"),
+          secure: false,
+          auth: {
+            user: config.get<string>("MAIL_USER"),
+            pass: config.get<string>("MAIL_PASSWORD"),
+          },
+        },
+        defaults: {
+          from: config.get<string>("MAIL_FROM"),
+        },
+      }),
+    }),
+    I18nModule.forRoot({
+      fallbackLanguage: "en",
+      loaderOptions: {
+        path: path.join(__dirname, "..", "i18n"),
+        watch: true,
+      },
+      resolvers: [
+        { use: HeaderResolver, options: ["lang", "locale", "l"] }, // Accept-Language from headers
+      ],
+    }),
+    UploadModule,
+    EventModule,
+    BookingModule,
+    MailModule,
+    AttendeesModule,
+    FavoritesModule,
+    ReviewModule,
   ],
-  controllers: [AppController],
-  providers: [AppService, PrismaService, MailService, EventService],
-  exports:[PrismaService]
 })
-export class AppModule implements NestModule{
-
-  configure(consumer: MiddlewareConsumer) {
-      consumer.apply(LoggerMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}
