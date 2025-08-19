@@ -1,10 +1,6 @@
 import {
   BadRequestException,
-<<<<<<< HEAD
   ConflictException,
-  HttpException,
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   HttpStatus,
   Injectable,
   NotFoundException,
@@ -17,22 +13,10 @@ import { cancelTicket } from "./dto/cancelTicket.dto";
 import { BookingStatus } from "@prisma/client";
 import { confirmBookingsDto } from "./dto/updateBooking.dto";
 import { CancelStatus } from "src/common/enums/enums";
-<<<<<<< HEAD
-import { EventEmitter2 } from "@nestjs/event-emitter";
-import { constructFrom } from "date-fns";
-import { SpotOpenedEvent } from "../event/spot-opened";
-@Injectable()
-export class BookingService {
-  private readonly lastNotifiedMap = new Map<number, Date>();
-  constructor(
-    private readonly prisma: PrismaService,
-    private eventEmitter: EventEmitter2,
-=======
 @Injectable()
 export class BookingService {
   constructor(
     private readonly prisma: PrismaService,
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
     private readonly mailService: MailService
   ) {}
 
@@ -115,7 +99,6 @@ export class BookingService {
       where: { id: data.bookingId },
       data: { status: BookingStatus.CANCELED },
     });
-<<<<<<< HEAD
     const checkCancellation = await this.prisma.cancellation.findFirst({
       where: { userId, eventId: booking.eventId },
     });
@@ -135,17 +118,6 @@ export class BookingService {
       });
     }
 
-=======
-    await this.prisma.cancellation.create({
-      data: {
-        userId,
-        eventId: booking.eventId,
-        bookingId: booking.id,
-        amount: booking.amount,
-        status: CancelStatus.PROCESSING,
-      },
-    });
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -156,11 +128,7 @@ export class BookingService {
       });
     }
     const event = await this.prisma.event.findUnique({
-<<<<<<< HEAD
       where: { id: booking.eventId },
-=======
-      where: { id: userId },
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
     });
     if (!event) {
       throw new NotFoundException({
@@ -173,38 +141,8 @@ export class BookingService {
       name: user.name,
       event: event.name,
     });
-<<<<<<< HEAD
-    const seats = event.availableSeats;
-    if (seats > 0) {
-      const now = new Date();
-      const lastSent = this.lastNotifiedMap.get(event.id);
-
-      if (
-        !lastSent ||
-        now.getTime() - lastSent.getTime() > 24 * 60 * 60 * 1000
-      ) {
-        const favorites = await this.prisma.favorites.findMany({
-          where: { userId: userId },
-          include: { user: true },
-        });
-        for (const fav of favorites) {
-          // await this.mailService.sendSpotOpenedNotification({
-          //   email: fav.user.email,
-          //   name: fav.user.name,
-          //   event: event.name,
-          // });
-          this.eventEmitter.emit(
-            "spot-opened",
-            new SpotOpenedEvent(fav.user.email, fav.user.name, event.name)
-          );
-        }
-        this.lastNotifiedMap.set(event.id, now);
-      }
-    }
-=======
 
     return { message: bookingMessages.REFUND_PROCESSED_SUCCESS };
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   }
 
   async getBookingByStatus(status: BookingStatus) {
@@ -303,7 +241,6 @@ export class BookingService {
       data: { status: CancelStatus.COMPLETED },
     });
 
-<<<<<<< HEAD
     await this.prisma.cancellation.deleteMany({
       where: { bookingId: cancellation.bookingId },
     });
@@ -312,8 +249,6 @@ export class BookingService {
       where: { id: cancellation.bookingId },
     });
 
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
     return;
   }
 }

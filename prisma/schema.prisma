@@ -120,10 +120,6 @@ model Cancellation {
   event     Event         @relation(fields: [eventId], references: [id],  onDelete:Cascade)
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
 enum Role {
   USER
   ADMIN

@@ -20,11 +20,6 @@ export const Messages = {
   FAIL_TO_SEND_EMAIL_CONFIRMATION:
     "Failed to send booking confirmation email to ",
   BOOKING_CANCELLATION_EMAIL: "Booking cancellation email sent to",
-<<<<<<< HEAD
-  SPOT_OPENED_NOTIFICATION:
-    "These spots are opened now, book it fast, and make yours!",
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   BOOKING_IS_CANCELLED: "Your booking is cancelled for the event",
   BOOKING_IS_CONFIRMED: "Your booking is cancelled for the event",
   FAILED_TO_SENT_EMAIL: "Failed to send email to ",
@@ -49,9 +44,6 @@ export const Messages = {
   REMINDER_SENT: "Reminder sent for event ID:",
   FAILED_TO_SENT_REMINDER: "Failed to send reminder for event ID",
   ERROR_HANDLE_REMINDER: "Error handling reminders:",
-<<<<<<< HEAD
   SEATS_LEFT_MSG: "register fast! only 15 or less seats are left for ",
   REGISTER_FAST: "Register fast! only 15 or less seats are left",
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
 };

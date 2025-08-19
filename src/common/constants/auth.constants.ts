@@ -22,11 +22,6 @@ export const Messages = {
     COOKIE_DELETED_SUCCESS: "Successfully logged out, token cookie deleted",
   },
 
-<<<<<<< HEAD
-  DASHBOARD: "Admin dashboard",
-  DATA_IN_DASHBOARD: "Data fetched successfully in dashboard.",
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
   LOGGED_SUCCESS: "Logged in successfully",
   NO_TOKEN: "No token provided",
   INVALID_EXPIRED_TOKEN: "Invalid or expired token",

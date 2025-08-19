@@ -20,12 +20,9 @@ export class MailService {
 
     const event = await this.prisma.event.findUnique({
       where: { id: data.eventId },
-<<<<<<< HEAD
       include: {
         user: true,
       },
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
     });
 
     if (!event) {
@@ -33,7 +30,6 @@ export class MailService {
       return;
     }
 
-<<<<<<< HEAD
     if (event.availableSeats <= 15) {
       const data = {
         event: event.name,
@@ -42,8 +38,6 @@ export class MailService {
       };
       await this.notificationForXSeats(data);
     }
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
     const attendees = await this.prisma.booking.findMany({
       where: { eventId: data.eventId },
       include: { user: true },
@@ -154,7 +148,6 @@ export class MailService {
       );
     }
   }
-<<<<<<< HEAD
 
   async sendSpotOpenedNotification(data: eventBooking) {
     try {
@@ -189,6 +182,4 @@ export class MailService {
       this.logger.log(error.message);
     }
   }
-=======
->>>>>>> 682ad4a3033634a2b73516cb5378f6417b30b585
 }
